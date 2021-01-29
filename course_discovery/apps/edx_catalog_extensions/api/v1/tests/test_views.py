@@ -99,8 +99,10 @@ class DistinctCountsAggregateSearchViewSetTests(SerializationMixin, LoginMixin,
         starting_soon = (now + datetime.timedelta(days=1), now + datetime.timedelta(days=2))
         upcoming = (now + datetime.timedelta(days=61), now + datetime.timedelta(days=62))
         archived = (now - datetime.timedelta(days=2), now - datetime.timedelta(days=1))
+        past = (now - datetime.timedelta(days=10), now - datetime.timedelta(days=3))
+        future = (now - datetime.timedelta(days=3), now + datetime.timedelta(days=15))
 
-        for dates in [current, starting_soon, upcoming, archived]:
+        for dates in [current, starting_soon, upcoming, archived, past, future]:
             course = CourseFactory(partner=self.partner)
             # Create two CourseRuns so that we can see that the distinct_count differs from the normal count
             self.build_courserun(start=dates[0], end=dates[1], course=course)
@@ -112,8 +114,13 @@ class DistinctCountsAggregateSearchViewSetTests(SerializationMixin, LoginMixin,
         expected_facets = DistinctCountsAggregateSearchViewSet.faceted_query_filter_fields.keys()
         for facet_name in expected_facets:
             facet = response.data['queries'][facet_name]
-            assert facet['count'] == 2
-            assert facet['distinct_count'] == 1
+            if facet_name in \
+                    ['availability_archived', 'course_ends_past', 'availability_current', 'course_ends_future']:
+                assert facet['count'] == 4
+                assert facet['distinct_count'] == 2
+            else:
+                assert facet['count'] == 2
+                assert facet['distinct_count'] == 1
             self.assert_url_path_and_query(facet['narrow_url'], self.path, {'selected_query_facets': [facet_name]})
 
     def test_objects_response(self):

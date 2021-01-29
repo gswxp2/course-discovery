@@ -25,6 +25,8 @@ class CourseSearchDocumentSerializer(ModelObjectDocumentSerializerMixin, DateTim
     course_runs = serializers.SerializerMethodField()
     seat_types = serializers.SerializerMethodField()
     skill_names = serializers.SerializerMethodField()
+    end_date = serializers.SerializerMethodField()
+    course_ends = serializers.SerializerMethodField()
 
     def course_run_detail(self, request, detail_fields, course_run):
         course_run_detail = {
@@ -81,6 +83,12 @@ class CourseSearchDocumentSerializer(ModelObjectDocumentSerializerMixin, DateTim
         course_skills = CourseSkills.objects.select_related('skill').filter(course_id=result.key)
         return list(set(course_skill.skill.name for course_skill in course_skills))
 
+    def get_end_date(self, result):
+        return self.handle_datetime_field(result.object.end_date)
+
+    def get_course_ends(self, result):
+        return str(result.object.course_ends)
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         request = self.context['request']
@@ -114,6 +122,8 @@ class CourseSearchDocumentSerializer(ModelObjectDocumentSerializerMixin, DateTim
             'uuid',
             'seat_types',
             'skill_names',
+            'end_date',
+            'course_ends',
             'subjects',
             'languages',
             'organizations',

@@ -53,6 +53,8 @@ class FacetQueryFieldsMixin:
         },
         'availability_upcoming': {'query': [ESDSLQ('range', start={"gte": "now+60d"})], 'enabled': True},
         'availability_archived': {'query': [ESDSLQ('range', end={"lte": "now"})], 'enabled': True},
+        'course_ends_future': {'query': [ESDSLQ('range', end_date={"gt": "now"})], 'enabled': True},
+        'course_ends_past': {'query': [ESDSLQ('range', end_date={"lt": "now"})], 'enabled': True},
     }
 
 
@@ -201,6 +203,11 @@ class BaseAggregateSearchViewSet(FacetQueryFieldsMixin, BaseElasticsearchDocumen
             ],
         },
         'end': {'field': 'end', 'lookups': [LOOKUP_QUERY_GT, LOOKUP_QUERY_GTE, LOOKUP_QUERY_LT, LOOKUP_QUERY_LTE]},
+        'end_date': {
+            'field': 'end_date',
+            'lookups': [LOOKUP_FILTER_RANGE, LOOKUP_QUERY_GT, LOOKUP_QUERY_GTE, LOOKUP_QUERY_LT, LOOKUP_QUERY_LTE]
+        },
+        'course_ends': {'field': 'course_ends.raw', 'lookups': [LOOKUP_FILTER_TERM, LOOKUP_FILTER_TERMS]},
         # FIXME: 'enrollment_mode' is a legacy field. It keeps being supported now, but should be deleted.
         'enrollment_mode': {'field': 'type.lower', 'lookups': [LOOKUP_FILTER_TERM]},
         'has_enrollable_seats': {'field': 'has_enrollable_seats', 'lookups': [LOOKUP_FILTER_TERM]},
