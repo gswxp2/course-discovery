@@ -7,7 +7,6 @@ function excludeCourseSkill(event) {
     );
 
     let skillId = event.target.parentElement.dataset.skillId;
-    console.log(skillId);
     $('#id_exclude_skills option[value="' + skillId  + '"]').attr('selected', true)
     $('#id_include_skills option[value="' + skillId  + '"]').attr('selected', false)
 
